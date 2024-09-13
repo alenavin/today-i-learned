@@ -13,73 +13,68 @@
     <title>Today I learned!</title>
   </head>
   <body>
-    <header class="header">
-      <img src="logo.png" alt="logo" height="68" width="68" />
-      <h1>Today I Learned</h1>
-      <button>Share a fact</button>
-    </header>
+    <div class="container">
+      <header class="header">
+        <div class="logo">
+          <img src="logo.png" alt="logo" />
+          <h1>Today I Learned</h1>
+        </div>
+        <button class="btn btn-large">Share a fact</button>
+      </header>
 
-    <form class="form">
-      <input type="text" placeholder="Share a fact with world..." />
-      <span>200</span>
-      <input type="text" placeholder="Thustworthy source..." />
-      <select>
-        <option value="">Choose category:</option>
-        <option value="technology">Technology</option>
-        <option value="science">Science</option>
-        <option value="finance">Finance</option>
-      </select>
-      <button>post</button>
-    </form>
+      <form class="form">
+        <input type="text" placeholder="Share a fact with world..." />
+        <span>200</span>
+        <input type="text" placeholder="Thustworthy source..." />
+        <select>
+          <option value="">Choose category:</option>
+          <option value="technology">Technology</option>
+          <option value="science">Science</option>
+          <option value="finance">Finance</option>
+        </select>
+        <button class="btn btn-large">post</button>
+      </form>
 
-    <main>
-      <aside>
-        <ul>
-          <li><button>All</button></li>
-          <li><button>Technology</button></li>
-          <li><button>Science</button></li>
-        </ul>
-      </aside>
+      <main class="main">
+        <aside>
+          <ul>
+            <li><button class="btn btn-all">All</button></li>
+            <li>
+              <button class="btn btn-cat" style="background-color: #3b82f6">
+                Technology
+              </button>
+            </li>
+            <li>
+              <button class="btn btn-cat" style="background-color: #16a34a">
+                Science
+              </button>
+            </li>
+          </ul>
+        </aside>
 
-      <section>
-        <ul>
-          <li class="fact">
-            <p>
-              React is being developed by Meta (formerly facebook)
-              <a href="https://opensource.fb.com/" target="_blank">(Source)</a>
+        <section>
+          <ul>
+            <li class="fact">
+              <p>
+                React is being developed by Meta (formerly facebook)
+                <a
+                  href="https://opensource.fb.com/"
+                  target="_blank"
+                  class="source"
+                  >(Source)</a
+                >
+              </p>
               <span class="tag" style="background-color: #3b82f6"
-                >##technology##</span
-              >
-            </p>
-            <div>
-              <button>👍 <strong>24</strong></button>
-              <button>🤯 <strong>9</strong></button>
-              <button>🤡 <strong>4</strong></button>
-            </div>
-          </li>
+                >##technology##
+              </span>
+              <div class="vote">
+                <button>👍 <strong>24</strong></button>
+                <button>🤯 <strong>9</strong></button>
+                <button>🤡 <strong>4</strong></button>
+              </div>
+            </li>
 
-          <li class="fact">
-            <p>
-              Millennial dads spend 3 times as much time with their kids than
-              their fathers spent with them. In 1982, 43% of fathers had never
-              changed a diaper. Today, that number is down to 3%
-              <a
-                href="https://www.mother.ly/parenting/millennial-dads-spend-more-time-with-their-kids"
-                target="_blank"
-                >(Source)
-              </a>
-              <span class="tag" style="background-color: #eab308"
-                >##society##</span
-              >
-            </p>
-            <div>
-              <button>👍 <strong>11</strong></button>
-              <button>🤯 <strong>2</strong></button>
-              <button>🤡 <strong>0</strong></button>
-            </div>
-          </li>
-        </ul>
-      </section>
-    </main>
-  </body>
-</html>
+            <li class="fact">
+              <p>
+                Millennial dads spend 3 times as much time with their kids than
+                their fathers spent wit
