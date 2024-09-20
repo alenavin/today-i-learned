@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./style.css";
+import { toHaveStyle } from "@testing-library/jest-dom/matchers";
+import supabase from "./supabase";
 
 const CATEGORIES = [
   { name: "technology", color: "#3b82f6" },
@@ -63,48 +65,176 @@ function Counter() {
 
 function App() {
   const [showForm, setShowForm] = useState(false);
+  const [facts, setFacts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState("all");
+
+  useEffect(
+    function () {
+      async function getFats() {
+        setIsLoading(true);
+
+        let query = supabase.from("facts").select("*");
+
+        if (currentCategory !== "all")
+          query = query.eq("category", currentCategory);
+        const { data: facts, error } = await query
+          .order("votesInteresting", { ascending: false })
+          .limit(1000);
+
+        if (!error) setFacts(facts);
+        else alert("There was a problem getting data");
+        setIsLoading(false);
+      }
+      getFats();
+    },
+    [currentCategory]
+  );
 
   return (
     <>
-      {/* Header */}
-      <header className="header">
-        <div className="logo">
-          <img src="logo.png" alt="logo" />
-          <h1>Today I Learned</h1>
-        </div>
-        <button
-          className="btn btn-large btn-open"
-          onClick={() => setShowForm((show) => !show)}
-        >
-          Share a fact
-        </button>
-      </header>
-      {showForm ? <NewFactForm /> : null}
+      <Header showForm={showForm} setShowForm={setShowForm} />
+      {showForm ? (
+        <NewFactForm setFacts={setFacts} setShowForm={setShowForm} />
+      ) : null}
 
       <main className="main">
-        <CategoryFilter />
-        <FactList />
+        <CategoryFilter setCurrentCategory={setCurrentCategory} />
+        {isLoading ? <Loader /> : <FactList facts={facts} />}
       </main>
     </>
   );
 }
 
-function NewFactForm() {
-  return <form className="form">NewFactForm</form>;
+function Loader() {
+  return <p className="message">Loading...</p>;
 }
 
-function CategoryFilter() {
+function Header({ showForm, setShowForm }) {
+  return (
+    <header className="header">
+      <div className="logo">
+        <img src="logo.png" alt="logo" />
+        <h1>Today I Learned</h1>
+      </div>
+      <button
+        className="btn btn-large btn-open"
+        onClick={() => setShowForm((show) => !show)}
+      >
+        {showForm ? "Close" : "Share a fact"}
+      </button>
+    </header>
+  );
+}
+
+function isValidHttpUrl(string) {
+  let url;
+
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
+function NewFactForm({ setFacts, setShowForm }) {
+  const [text, setText] = useState("");
+  const [source, setSource] = useState("http://example.com");
+  const [category, setCategory] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const textLength = text.length;
+
+  async function handleSubmit(e) {
+    // 1. prevent browser reload
+    e.preventDefault();
+    console.log(text, source, category);
+    // 2 chack if the data is valid
+    if (text && isValidHttpUrl(source) && category && textLength <= 200) {
+      // 3 create a new fact obj
+      //  const newFact = {
+      // id: Math.round(Math.random() * 10000000),
+      // text,
+      // source,
+      // category,
+      // votesInteresting: 0,
+      // votesMindblowing: 0,
+      // votesFalse: 0,
+      // createdIn: new Date().getCurrentYear,
+
+      //3 upload file to supabase and receeive factt obj
+      setIsUploading(true);
+      const { data: newFact, error } = await supabase
+        .from("facts")
+        .insert([{ text, source, category }])
+        .select();
+      setIsUploading(false);
+      //};
+      // 4 add new fact to the user interface aka add to state
+      setFacts((facts) => [newFact[0], ...facts]);
+      // 5 reset input fields back to empty
+      setText("");
+      setSource("");
+      setCategory("");
+      // 6 close form
+      setShowForm(false);
+    }
+  }
+  return (
+    <form className="form" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Share a fact with world..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        disabled={isUploading}
+      />
+      <span>{200 - textLength}</span>
+      <input
+        value={source}
+        type="text"
+        placeholder="Thustworthy source..."
+        onChange={(e) => setSource(e.target.value)}
+        disabled={isUploading}
+      />
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        disabled={isUploading}
+      >
+        <option value="">Choose category:</option>
+        {CATEGORIES.map((cat) => (
+          <option key={cat.name} value={cat.name}>
+            {cat.name.toLocaleUpperCase()}
+          </option>
+        ))}
+      </select>
+      <button className="btn btn-large" disabled={isUploading}>
+        post
+      </button>
+    </form>
+  );
+}
+
+function CategoryFilter({ setCurrentCategory }) {
   return (
     <aside>
       <ul>
         <li>
-          <button className="btn btn-all">All</button>
+          <button
+            className="btn btn-all"
+            onClick={() => setCurrentCategory("all")}
+          >
+            All
+          </button>
         </li>
         {CATEGORIES.map((cat) => (
           <li key={cat.name}>
             <button
               className="btn btn-cat"
               style={{ backgroundColor: cat.color }}
+              onClick={() => setCurrentCategory(cat.name)}
             >
               {cat.name}
             </button>
@@ -115,9 +245,14 @@ function CategoryFilter() {
   );
 }
 
-function FactList() {
-  const facts = initialFacts;
-
+function FactList({ facts }) {
+  if (facts.length === 0) {
+    return (
+      <p className="message">
+        No facts for this category yet! Create the first one 👻
+      </p>
+    );
+  }
   return (
     <section>
       <ul className="facts-list">
